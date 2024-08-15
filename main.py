@@ -1,16 +1,20 @@
 import numpy as np
-inputs= [1,2,3,2.5]
-weights = [0.2,0.8,-0.5,1.0]
-bias = 2
+np.random.seed(0)
+X=[[1,2,3,2.5],
+   [2.0,5.0,-1.0,2.0],
+   [-1.5,2.7,3.3,-0.8]]
 
-#output of the layer we are currnetly calculating
+class LayerDense:
+    def __init__(self,neuralImps,numOfNeurons):
+        self.weights = 0.1* np.random.randn(neuralImps, numOfNeurons)
+        self.biases= np.zeros((1,numOfNeurons))
+    def forward(self, inputs):
+        self.output = np.dot(inputs, self.weights) + self.biases
 
-# layerOutputs = [] 
-# for neuronW, neuronB in zip(weights,biases):
-#     neuronO = 0
-#     for neuronI, weight in zip(inputs, neuronW):
-#         neuronO += neuronI * weight
-#     neuronO += neuronB
-#     layerOutputs.append(neuronO)
+lay1 = LayerDense(len(X[0]),5)
 
-# print(layerOutputs)
+lay2 = LayerDense(5,2)
+
+lay1.forward(X)
+z = lay2.forward(lay1.output)
+print(lay2.output)
