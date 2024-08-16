@@ -1,8 +1,19 @@
 import numpy as np
-np.random.seed(0)
-X=[[1,2,3,2.5],
-   [2.0,5.0,-1.0,2.0],
-   [-1.5,2.7,3.3,-0.8]]
+import nnfs
+
+nnfs.init()
+
+
+def createData(points,classes):
+    X = np.zeros((points*classes, 2))
+    y = np.zeros(points*classes, dtype='uint8')
+    for class_number in range(classes):
+        ix = range(points*class_number, points*(class_number+1))
+        r = np.linspace(0.0, 1, points)  # radius
+        t = np.linspace(class_number*4, (class_number+1)*4, points) + np.random.randn(points)*0.2
+        X[ix] = np.c_[r*np.sin(t*2.5), r*np.cos(t*2.5)]
+        y[ix] = class_number
+    return X, y
 
 class LayerDense:
     def __init__(self,neuralImps,numOfNeurons):
@@ -11,10 +22,26 @@ class LayerDense:
     def forward(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
 
-lay1 = LayerDense(len(X[0]),5)
+class activationRectifiedLinearUnit:
+    def foward(self,inputs):
+        self.output = np.maximum(0,inputs)
 
-lay2 = LayerDense(5,2)
+class activationSoftMax:
+    def foward(self,inputs):
+        expVal = np.exp(inputs - np.max(inputs, axis =1, keepdims = True))
+        probabilities = expVal/np.sum(expVal, axis = 1, keepdims=True)
+        self.output = probabilities
 
-lay1.forward(X)
-z = lay2.forward(lay1.output)
-print(lay2.output)
+X,y = createData(100, 3)
+
+dense1 = LayerDense(2,3)
+activation1 =activationRectifiedLinearUnit()
+
+dense2 = LayerDense(3,3)
+activation2 = activationSoftMax()
+
+dense1.forward(X)
+activation1.foward(dense1.output)
+dense2.forward(activation1.output)
+activation2.foward(dense2.output)
+print(activation2.output)
