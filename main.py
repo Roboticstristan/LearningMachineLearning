@@ -1,5 +1,6 @@
 import numpy as np
 import nnfs
+import math
 
 nnfs.init()
 
@@ -32,6 +33,26 @@ class activationSoftMax:
         probabilities = expVal/np.sum(expVal, axis = 1, keepdims=True)
         self.output = probabilities
 
+class Loss:
+    def calculate(self, predictedVal, y):
+        sampleLosses = self.forward(predictedVal,y)
+        data_loss = np.mean(sampleLosses)
+        return data_loss
+    
+class categoricalCrossEntrophy(Loss):
+    def forward(self, yPred, oneHotEncoded):
+        samples = len(yPred)
+        yPredClip = np.clip(yPred,1e-7, 1-1e-7)
+
+        if len(oneHotEncoded.shape) ==1:
+            CorrectConfidences = yPredClip[range(samples),oneHotEncoded]
+        
+        elif len(oneHotEncoded.shape) == 2:
+            CorrectConfidences = np.sum(yPredClip*oneHotEncoded, axis = 1)
+        
+        loss = -np.log(CorrectConfidences)
+        return loss
+    
 X,y = createData(100, 3)
 
 dense1 = LayerDense(2,3)
@@ -44,4 +65,8 @@ dense1.forward(X)
 activation1.foward(dense1.output)
 dense2.forward(activation1.output)
 activation2.foward(dense2.output)
-print(activation2.output)
+#print(activation2.output)
+
+lossFunc = categoricalCrossEntrophy()
+loss = lossFunc.calculate(activation2.output,y)
+print("loss: " + str(loss))
