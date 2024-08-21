@@ -70,3 +70,4 @@ activation2.foward(dense2.output)
 lossFunc = categoricalCrossEntrophy()
 loss = lossFunc.calculate(activation2.output,y)
 print("loss: " + str(loss))
+
